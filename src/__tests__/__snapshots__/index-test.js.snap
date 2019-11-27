@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`works 1`] = `
+"var simpleTailCall = trampoline(function simpleTailCall() {
+    _it => {
+        return simpleTailCall();
+    };
+});
+
+function trampoline(fn) {
+    return function trampolined(...args) {
+        let result = fn(...args);
+
+        while (typeof result === 'function') {
+            result = result();
+        }
+
+        return result;
+    };
+}"
+`;

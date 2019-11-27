@@ -1,3 +1,6 @@
+const trampolineAST = require('./trampoline');
+const template = require("@babel/template").default;
+
 const isCallExpressionWithTco = (functionName, node) => {
   return node.type === 'CallExpression' && node.callee.name === functionName;
 };
@@ -64,7 +67,7 @@ function findTailCalls(fnPath, fnName) {
   };
 }
 
-export default function(babel) {
+module.exports = function(babel) {
   const { types: t } = babel;
   const wrapWithArrowFunction = path => {
     const id = path.scope.generateUidIdentifier('it');
@@ -82,6 +85,9 @@ export default function(babel) {
   return {
     name: 'ast-transform', // not required
     visitor: {
+      Program(path) {
+        path.node.body.push(trampolineAST);
+      },
       Function(path) {
         if (path.node.id) {
           const { tailCalls, needsClosure } = findTailCalls(
@@ -90,10 +96,28 @@ export default function(babel) {
           );
 
           if (tailCalls.length > 0 && !needsClosure) {
+            const functionExpressWrapperId = path.scope.generateUidIdentifier(`${path.node.id.name}`)
+            const functionExpressionWrapper = t.functionExpression(path.node.id, path.node.params, path.node.body)
+
+            let wrapper = t.variableDeclaration('var', [
+              t.variableDeclarator(
+                path.node.id,
+                t.callExpression(trampolineAST.id, [functionExpressionWrapper])
+              )
+            ]);
+            path.replaceWith(wrapper);
+
+            // path.replaceWith(
+            //   template('(FUNCTION(ARGUMENTS))')({
+            //     FUNCTION: t.identifier('trampoline'),
+            //     ARGUMENTS: path.node.id
+            //   })
+            // );
+
             tailCalls.forEach(wrapWithArrowFunction);
           }
         }
       }
     }
   };
-}
+};

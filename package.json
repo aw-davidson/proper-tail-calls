@@ -1,0 +1,19 @@
+{
+  "name": "propertailcalls",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:update": "jest -u"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/template": "^7.7.4",
+    "jest": "^24.9.0"
+  },
+  "dependencies": {
+    "babel-core": "^6.26.3"
+  }
+}
