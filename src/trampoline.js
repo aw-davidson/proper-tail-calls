@@ -4,7 +4,6 @@ const template = require("@babel/template").default;
 function trampoline(fn) {
     return function trampolined(...args) {
       let result = fn(...args);
-  
       while (typeof result === 'function') {
         result = result();
       }
@@ -13,6 +12,4 @@ function trampoline(fn) {
     };
   }
 
-
-const ast = template.ast(trampoline.toString());
-module.exports = ast;
+module.exports = template.ast(trampoline.toString());

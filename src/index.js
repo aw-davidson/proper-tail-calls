@@ -70,17 +70,15 @@ function findTailCalls(fnPath, fnName) {
 module.exports = function(babel) {
   const { types: t } = babel;
   const wrapWithArrowFunction = path => {
-    const id = path.scope.generateUidIdentifier('it');
-
     // create an arrow function that wraps and returns the expression
     // generating an arrow maintains lexical `this`
     const fn = t.arrowFunctionExpression(
-      [id],
+      [],
       t.blockStatement([t.returnStatement(path.node.argument)])
     );
 
     // replace the expression with the new wrapper that returns it
-    path.replaceWith(fn);
+    path.replaceWith(t.returnStatement(fn));
   };
   return {
     name: 'ast-transform', // not required
@@ -96,7 +94,6 @@ module.exports = function(babel) {
           );
 
           if (tailCalls.length > 0 && !needsClosure) {
-            const functionExpressWrapperId = path.scope.generateUidIdentifier(`${path.node.id.name}`)
             const functionExpressionWrapper = t.functionExpression(path.node.id, path.node.params, path.node.body)
 
             let wrapper = t.variableDeclaration('var', [

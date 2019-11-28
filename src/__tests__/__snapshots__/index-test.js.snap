@@ -2,7 +2,7 @@
 
 exports[`works 1`] = `
 "var simpleTailCall = trampoline(function simpleTailCall() {
-    _it => {
+    () => {
         return simpleTailCall();
     };
 });
