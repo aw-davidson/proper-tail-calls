@@ -1,7 +1,7 @@
 const babel = require('babel-core');
 const plugin = require('../');
 
-var example = `
+const example = `
 function simpleTailCall() {
     return simpleTailCall()
 }
@@ -15,7 +15,7 @@ const fibExample = `
 
   return fib(n - 1, last + beforeLast, last)
 }
-`
+`;
 
 const countVowelsExample = `
 const isVowel = (char) => /[aeioue]/.test(char.toLowerCase())
@@ -26,41 +26,48 @@ function countVowels(count, str) {
   }
   return countVowels(count, str.slice(1));
 }
-`
+`;
 
 it('works', () => {
-  const {code} = babel.transform(example, {plugins: [plugin]});
+  const { code } = babel.transform(example, { plugins: [plugin] });
   expect(code).toMatchSnapshot();
 });
 
 it('transforms proper tail calls', () => {
-  var {code} = babel.transform(fibExample, {plugins: [plugin]});
-  var f = new Function(`
+  const { code } = babel.transform(fibExample, { plugins: [plugin] });
+  const f = new Function(`
     ${code};
     return fib;
   `);
-  var fib = f();
-  expect(fib(10)).toBe(55)
+  const fib = f();
+  expect(fib(10)).toBe(55);
 });
 
 it('does not produce stack overflow where a normal function would', () => {
-  var {code} = babel.transform(countVowelsExample, {plugins: [plugin]});
-  var f = new Function(`
+  const { code } = babel.transform(countVowelsExample, { plugins: [plugin] });
+  const f = new Function(`
     ${code};
     return countVowels;
   `);
-  var countVowels = f();
-  expect(countVowels(0, "a".repeat(10000))).toBe(10000)
+  const countVowels = f();
+  expect(countVowels(0, 'a'.repeat(10000))).toBe(10000);
 
   const getOverflowFn = new Function(`
   ${countVowelsExample};
   return countVowels;
 `);
-  var countVowels = getOverflowFn();
+  const countVowelsOverflow = getOverflowFn();
 
   try {
-    countVowels(0, "a".repeat(10000))
+    countVowelsOverflow(0, 'a'.repeat(10000));
   } catch (e) {
-    expect(e).toEqual(RangeError(`Maximum call stack size exceeded`))
+    expect(e).toEqual(RangeError('Maximum call stack size exceeded'));
   }
+});
+
+it('works for ternary expressions', () => {
+  const ternaryCode = 'const counter = (n, acc = 0) => n === 0 ? acc : counter(n - 1, acc + 1)';
+
+  const { code } = babel.transform(ternaryCode, { plugins: [plugin] });
+  expect(code).toMatchSnapshot();
 });

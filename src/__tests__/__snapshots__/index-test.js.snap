@@ -19,3 +19,21 @@ function trampoline(fn) {
     };
 }"
 `;
+
+exports[`works for ternary expressions 1`] = `
+"const counter = trampoline((n, acc = 0) => () => {
+  return n === 0 ? acc : counter(n - 1, acc + 1);
+});
+
+function trampoline(fn) {
+  return function trampolined(...args) {
+    let result = fn(...args);
+
+    while (typeof result === 'function') {
+      result = result();
+    }
+
+    return result;
+  };
+}"
+`;
