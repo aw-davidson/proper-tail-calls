@@ -1,6 +1,8 @@
 const babel = require('babel-core');
 const plugin = require('../');
 
+const multipleCallsExample = require('../../examples/multipleCalls');
+
 const example = `
 function simpleTailCall() {
     return simpleTailCall()
@@ -65,9 +67,32 @@ it('does not produce stack overflow where a normal function would', () => {
   }
 });
 
-it('works for ternary expressions', () => {
+it('works for ternary expressions with implicit return', () => {
   const ternaryCode = 'const counter = (n, acc = 0) => n === 0 ? acc : counter(n - 1, acc + 1)';
 
   const { code } = babel.transform(ternaryCode, { plugins: [plugin] });
+  expect(code).toMatchSnapshot();
+});
+
+it('works for ternary expressions with explicit return', () => {
+  const ternaryCode = `const counter = (n, acc = 0) => {
+    return n === 0 ? acc : counter(n - 1, acc + 1)
+  }`;
+
+  const { code } = babel.transform(ternaryCode, { plugins: [plugin] });
+  expect(code).toMatchSnapshot();
+});
+
+it('works for functions with multiple function calls', () => {
+  const { code } = babel.transform(multipleCallsExample, { plugins: [plugin] });
+  expect(code).toMatchSnapshot();
+});
+
+it('it dynamically generates the name of the trampoline function based on the global program scope', () => {
+  const trampolineFn = `
+  const _trampoline = () => {}
+  const trampoline = () => {}`;
+
+  const { code } = babel.transform(trampolineFn, { plugins: [plugin] });
   expect(code).toMatchSnapshot();
 });

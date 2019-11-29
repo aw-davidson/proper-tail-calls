@@ -1,17 +1,23 @@
-const trampolineAST = require('./trampoline');
+const buildTrampolineAST = require('./buildTrampoline');
 const findTailCalls = require('./findTailCalls');
 
 module.exports = function babelVisitorExport(babel) {
   const { types: t } = babel;
 
+  let trampolineId;
   return {
     name: 'proper-tail-calls-transformer',
     visitor: {
+      // Program runs once and is called first
       Program(path) {
+        const trampolineAST = buildTrampolineAST({
+          TRAMPOLINE_PLACEHOLDER_NAME: path.scope.generateUidIdentifier('trampoline'),
+        });
+        trampolineId = trampolineAST.id;
         path.node.body.push(trampolineAST);
       },
       FunctionDeclaration(path) {
-        transformProperTailCalls({ path, t });
+        transformProperTailCalls({ path, t, trampolineId });
       },
       VariableDeclarator(path) {
         if ((path.get('init').isArrowFunctionExpression() || path.get('init').isFunctionExpression()) && path.get('id').isIdentifier()) {
@@ -21,9 +27,6 @@ module.exports = function babelVisitorExport(babel) {
           const { tailCalls, needsClosure } = findTailCalls(functionBody, functionName);
 
           if (tailCalls.length > 0 && !needsClosure) {
-            const trampolined = t.callExpression(t.identifier('trampoline'), [functionBody.node]);
-            functionBody.replaceWith(trampolined);
-
             const wrapWithArrowFunction = (innerPath) => {
               if (!t.isBlockStatement(functionBody.node.body)) {
                 const fn = t.arrowFunctionExpression(
@@ -43,6 +46,8 @@ module.exports = function babelVisitorExport(babel) {
             };
 
             tailCalls.forEach(wrapWithArrowFunction);
+            const trampolined = t.callExpression(trampolineId, [functionBody.node]);
+            functionBody.replaceWith(trampolined);
           }
         }
       },
@@ -50,7 +55,7 @@ module.exports = function babelVisitorExport(babel) {
   };
 };
 
-function transformProperTailCalls({ path, t }) {
+function transformProperTailCalls({ path, t, trampolineId }) {
   if (path.node.id) {
     const { tailCalls, needsClosure } = findTailCalls(
       path,
@@ -67,7 +72,7 @@ function transformProperTailCalls({ path, t }) {
       const trampolinedVariableDeclartion = t.variableDeclaration('var', [
         t.variableDeclarator(
           path.node.id,
-          t.callExpression(trampolineAST.id, [functionExpressionWrapper]),
+          t.callExpression(trampolineId, [functionExpressionWrapper]),
         ),
       ]);
       path.replaceWith(trampolinedVariableDeclartion);
