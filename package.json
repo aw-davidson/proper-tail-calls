@@ -1,14 +1,14 @@
 {
-  "name": "propertailcalls",
+  "name": "proper-tail-calls",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Babel plugin that optimizes tail-recursion",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "test:update": "jest -u"
   },
-  "author": "",
+  "author": "Alec Davidson",
   "license": "ISC",
   "devDependencies": {
     "benchmark": "^2.1.4",
