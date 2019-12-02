@@ -1,6 +1,19 @@
 # Tail Call Optimization for JavaScript
 
+Proper tail call is a technique where the program will not create additional stack frames for a recursion that fits the [tail call definition](https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/). Instead of having a recursion with all its stack saved in memory, we will have just one level of stack saved, optimizing the recursion stack.
+
+The problem:
+
+```JavaScript
+factorial(10)
+  //=> 3628800
+factorial(32768)
+  //=> RangeError: Maximum call stack size exceeded
+```
+
 ## How It Works
+
+Recursive calls that are in a proper tail position will be *trampolined*. Instead of recursing directly we return an anonymous funciton which continues the recursion. This process does not accumulate stack frames in proportion to the recursion depth. Memory related to stack frame overhead stays constant. 
 
 ```JavaScript
 function factorial(x, acc = 1) {
