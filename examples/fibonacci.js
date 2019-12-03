@@ -6,5 +6,4 @@ function fibonacci(n, last = 1, beforeLast = 0) {
   return fibonacci(n - 1, last + beforeLast, last);
 }
 
-module.exports = fibonacci
-;
+module.exports = fibonacci;

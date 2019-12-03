@@ -1,47 +1,47 @@
-# Tail Call Optimization for JavaScript
+# Proper Tail Calls in JavaScript
 
-Proper tail call is a technique where the program will not create additional stack frames for a recursion that fits the [tail call definition](https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/). Instead of having a recursion with all its stack saved in memory, we will have just one level of stack saved, optimizing the recursion stack.
+Proper tail calls are recursive function calls that do not need to allocate extra stack space proportional to recursion depth. They are a part of the ECMAScript 6 standard but are currently [only supported in Safari](https://kangax.github.io/compat-table/es6/). This plugin implements proper tail calls through a technique called function [trampolining](https://raganwald.com/2013/03/28/trampolines-in-javascript.html). Using the proper-tail-calls plugin, a program could make an unbounded number of consecutive tail calls without unboundedly growing the stack.
 
-The problem:
+## Example
 
 ```JavaScript
+function factorial(num, accumulated = 1) {
+    if (num <= 1) {
+        return accumulated;
+    } else {
+        return factorial(num - 1, num * accumulated); // proper tail position
+    }
+}
+
 factorial(10)
   //=> 3628800
-factorial(32768)
+factorial(32687)
   //=> RangeError: Maximum call stack size exceeded
+
+const properFactorial = babel.transform(factorial.toString(), {
+  plugins: ["proper-tail-calls"]
+})
+properFactorial(32687)
+  //=> Infinity
 ```
 
 ## How It Works
 
-Recursive calls that are in a proper tail position will be *trampolined*. Instead of recursing directly we return an anonymous funciton which continues the recursion. This process does not accumulate stack frames in proportion to the recursion depth. Memory related to stack frame overhead stays constant. 
+Recursive calls that are in a [proper tail position](https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/) will be *trampolined*. Instead of recursing directly, the recursive call is deferred and a wrapper function is returned.
+
+The factorial example above transpiles to:
 
 ```JavaScript
-function factorial(x, acc = 1) {
-    if (x <= 1) {
-        return acc;
-    } else {
-        return factorial(x - 1, x * acc);
-    }
-}
-```
-
-transpiles to:
-
-```JavaScript
-var factorial = _trampoline(function factorial(x, acc = 1) {
-    if (x <= 1) {
-        return acc;
+var factorial = _trampoline(function factorial(num, accumulated = 1) {
+    if (num <= 1) {
+        return accumulated;
     } else {
         return () => {
-            return factorial(x - 1, x * acc);
+            return factorial(num - 1, num * accumulated);
         }
     }
 })
-```
 
-where _trampoline is defined as
-
-```JavaScript
 function _trampoline(fn) {
   return function trampolined(...args) {
     let result = fn(...args);
