@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-proper-tail-calls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Babel plugin that optimizes tail recursion",
   "main": "src/index.js",
   "files": [
@@ -27,7 +27,7 @@
   "dependencies": {
     "@babel/core": "^7.7.4",
     "@babel/template": "^7.7.4"
-  } ,
+  },
   "keywords": [
     "functional",
     "tail call",
