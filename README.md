@@ -18,10 +18,12 @@ factorial(10)
 factorial(32687)
   //=> RangeError: Maximum call stack size exceeded
 
-const properFactorial = babel.transform(factorial.toString(), {
+const { code } = babel.transform(factorial.toString(), {
   plugins: ["proper-tail-calls"]
 })
-properFactorial(32687)
+
+factorial = Function(`${code} return factorial`)()
+factorial(32687)
   //=> Infinity
 ```
 
