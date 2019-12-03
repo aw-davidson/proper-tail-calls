@@ -1,8 +1,11 @@
 {
-  "name": "proper-tail-calls",
+  "name": "babel-plugin-proper-tail-calls",
   "version": "1.0.0",
-  "description": "A Babel plugin that optimizes tail-recursion",
-  "main": "index.js",
+  "description": "A Babel plugin that optimizes tail recursion",
+  "main": "src/index.js",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
@@ -24,5 +27,16 @@
   "dependencies": {
     "@babel/core": "^7.7.4",
     "@babel/template": "^7.7.4"
-  }
+  } ,
+  "keywords": [
+    "functional",
+    "tail call",
+    "tail calls",
+    "babel",
+    "plugin",
+    "scala",
+    "haskell",
+    "clojure",
+    "recursion"
+  ]
 }
