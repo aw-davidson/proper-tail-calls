@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it dynamically generates the name of the trampoline function based on the global program scope 1`] = `
-"
-const _trampoline = () => {};
+"const _trampoline = () => {};
+
 const trampoline = () => {};
 
 function _trampoline2(fn) {
@@ -20,21 +20,21 @@ function _trampoline2(fn) {
 
 exports[`works 1`] = `
 "var simpleTailCall = _trampoline(function simpleTailCall() {
-    return () => {
-        return simpleTailCall();
-    };
+  return () => {
+    return simpleTailCall();
+  };
 });
 
 function _trampoline(fn) {
-    return function trampolined(...args) {
-        let result = fn(...args);
+  return function trampolined(...args) {
+    let result = fn(...args);
 
-        while (typeof result === 'function') {
-            result = result();
-        }
+    while (typeof result === 'function') {
+      result = result();
+    }
 
-        return result;
-    };
+    return result;
+  };
 }"
 `;
 
@@ -76,21 +76,21 @@ function _trampoline(fn) {
 
 exports[`works for ternary expressions with explicit return 1`] = `
 "const counter = _trampoline((n, acc = 0) => {
-    return () => {
-        return n === 0 ? acc : counter(n - 1, acc + 1);
-    };
+  return () => {
+    return n === 0 ? acc : counter(n - 1, acc + 1);
+  };
 });
 
 function _trampoline(fn) {
-    return function trampolined(...args) {
-        let result = fn(...args);
+  return function trampolined(...args) {
+    let result = fn(...args);
 
-        while (typeof result === 'function') {
-            result = result();
-        }
+    while (typeof result === 'function') {
+      result = result();
+    }
 
-        return result;
-    };
+    return result;
+  };
 }"
 `;
 
