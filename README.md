@@ -59,7 +59,7 @@ function _trampoline(fn) {
 ## Installation
 
 ```sh
-$ npm install --save-dev proper-tail-calls
+$ npm install --save-dev babel-plugin-proper-tail-calls
 ```
 
 ## Usage
